@@ -3,7 +3,7 @@ import '../local/isar/collections/customer.dart';
 import '../local/isar/isar_services.dart';
 
 class CustomerRepository {
-  final _isar = IsarService.isar;
+  final _isar = IsarService.instance;
 
   /// Add customer
   Future<void> addCustomer(Customer customer) async {

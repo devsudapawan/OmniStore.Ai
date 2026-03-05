@@ -1,17 +1,20 @@
 import 'package:isar_community/isar.dart';
 
-part 'category.g.dart';
+part 'settings.g.dart';
+
 @Collection()
-class IsarCategory {
+class IsarSettings {
   Id id = Isar.autoIncrement;
 
   @Index(unique: true)
-  late String categoryId;
+  late String settingsId;
 
-  @Index()
+  @Index(unique: true)
   late String businessId;
 
-  late String name;
+  late String defaultUnit;
+  late String currency;
+  late bool creditEnabled;
   late DateTime createdAt;
 
   @Index()

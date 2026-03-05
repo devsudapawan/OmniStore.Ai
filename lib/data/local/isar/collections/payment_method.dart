@@ -1,17 +1,19 @@
 import 'package:isar_community/isar.dart';
 
-part 'category.g.dart';
+part 'payment_method.g.dart';
+
 @Collection()
-class IsarCategory {
+class IsarPaymentMethod {
   Id id = Isar.autoIncrement;
 
   @Index(unique: true)
-  late String categoryId;
+  late String methodId;
 
   @Index()
   late String businessId;
 
   late String name;
+  late bool isDefault;
   late DateTime createdAt;
 
   @Index()

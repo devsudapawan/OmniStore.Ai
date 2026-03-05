@@ -329,9 +329,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               hintText: 'example@gmail.com',
             ),
             onChanged: (val) {
+              final email = val.trim();
+
               setState(() {
-                _emailValid =
-                    RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val);
+                _emailValid = RegExp(
+                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                ).hasMatch(email);
               });
             },
           ),
@@ -349,7 +352,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: _emailValid ? _onContinue : null,
+        onPressed: _emailValid && !state.isLoading ? _onContinue : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: _emailValid
               ? const Color(0xFF3B82F6)
@@ -510,16 +513,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _onContinue() async {
     final email = _emailController.text.trim();
 
-    await ref.read(loginProvider.notifier).sendOtp(email);
+    try {
+      await ref.read(loginProvider.notifier).sendOtp(email);
 
-    final error = ref.read(loginProvider).error;
+      if (!mounted) return;
 
-    if (error == null && mounted) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => OtpScreen(email: email),
         ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
       );
     }
   }

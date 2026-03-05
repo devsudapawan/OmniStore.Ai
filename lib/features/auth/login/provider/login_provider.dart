@@ -1,93 +1,99 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../data/remote/supabase/auth_remote.dart';
-import '../../../../data/repository/auth_repository.dart';
+  import 'package:flutter_riverpod/flutter_riverpod.dart';
+  import 'package:supabase_flutter/supabase_flutter.dart';
+  import '../../../../data/remote/supabase/auth_remote.dart';
+  import '../../../../data/repository/auth_repository.dart';
 
-/// -------------------------------
-/// Repository Provider
-/// -------------------------------
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(AuthRemote());
-});
-
-/// -------------------------------
-/// Auth State
-/// -------------------------------
-class LoginState {
-  final bool isLoading;
-  final String? error;
-
-  const LoginState({
-    this.isLoading = false,
-    this.error,
+  /// -------------------------------
+  /// Repository Provider
+  /// -------------------------------
+  final authRepositoryProvider = Provider<AuthRepository>((ref) {
+    return AuthRepository(AuthRemote());
   });
 
-  LoginState copyWith({
-    bool? isLoading,
-    String? error,
-  }) {
-    return LoginState(
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
-    );
-  }
-}
+  /// -------------------------------
+  /// Auth State
+  /// -------------------------------
+  class LoginState {
+    final bool isLoading;
+    final String? error;
 
-/// -------------------------------
-/// Auth Notifier
-/// -------------------------------
-class LoginNotifier extends StateNotifier<LoginState> {
-  final AuthRepository _repository;
+    const LoginState({
+      this.isLoading = false,
+      this.error,
+    });
 
-  LoginNotifier(this._repository) : super(const LoginState());
-
-  /// Send OTP
-  Future<void> sendOtp(String email) async {
-    try {
-      state = state.copyWith(isLoading: true, error: null);
-
-      await _repository.sendOtp(email);
-
-      state = state.copyWith(isLoading: false);
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+    LoginState copyWith({
+      bool? isLoading,
+      String? error,
+    }) {
+      return LoginState(
+        isLoading: isLoading ?? this.isLoading,
+        error: error,
       );
     }
   }
 
-  /// Verify OTP
-  Future<User?> verifyOtp({
-    required String email,
-    required String token,
-  }) async {
-    try {
-      state = state.copyWith(isLoading: true, error: null);
+  /// -------------------------------
+  /// Auth Notifier
+  /// -------------------------------
+  class LoginNotifier extends StateNotifier<LoginState> {
+    final AuthRepository _repository;
 
-      final user = await _repository.verifyOtp(
-        email: email,
-        token: token,
-      );
+    LoginNotifier(this._repository) : super(const LoginState());
 
-      state = state.copyWith(isLoading: false);
+    /// Send OTP
+    Future<void> sendOtp(String email) async {
+      try {
+        print("Sending OTP to $email");
 
-      return user;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: "Invalid OTP",
-      );
-      return null;
+        state = state.copyWith(isLoading: true, error: null);
+
+        await _repository.sendOtp(email);
+
+        print("OTP Sent Successfully");
+
+        state = state.copyWith(isLoading: false);
+      } catch (e) {
+        print("OTP Error: $e");
+
+        state = state.copyWith(
+          isLoading: false,
+          error: e.toString(),
+        );
+      }
+    }
+
+    /// Verify OTP
+    Future<User?> verifyOtp({
+      required String email,
+      required String token,
+    }) async {
+      try {
+        state = state.copyWith(isLoading: true, error: null);
+
+        final user = await _repository.verifyOtp(
+          email: email,
+          token: token,
+        );
+
+        state = state.copyWith(isLoading: false);
+
+        return user;
+      } catch (e) {
+        state = state.copyWith(
+          isLoading: false,
+          error: "Invalid OTP",
+        );
+        return null;
+      }
     }
   }
-}
 
-/// -------------------------------
-/// Provider
-/// -------------------------------
-final loginProvider =
-StateNotifierProvider<LoginNotifier, LoginState>((ref) {
-  final repository = ref.read(authRepositoryProvider);
-  return LoginNotifier(repository);
-});
+  /// -------------------------------
+  /// Provider
+  /// -------------------------------
+  final loginProvider =
+  StateNotifierProvider<LoginNotifier, LoginState>((ref) {
+    final repository = ref.read(authRepositoryProvider);
+    return LoginNotifier(repository);
+  });
