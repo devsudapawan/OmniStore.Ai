@@ -103,14 +103,14 @@ class _SelectStoreTypeScreenState
                   // ── Grid ──
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: GridView.builder(
                         physics: const BouncingScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
                           childAspectRatio: 1.05,
                         ),
                         itemCount: StoreType.values.length,

@@ -23,8 +23,14 @@ import 'package:path_provider/path_provider.dart';
 
 import 'collections/business.dart';
 import 'collections/category.dart';
+import 'collections/customer.dart';
+import 'collections/inventory_event.dart';
+import 'collections/payment_event.dart';
 import 'collections/payment_method.dart';
+import 'collections/product.dart';
 import 'collections/settings.dart';
+import 'collections/transaction.dart';
+import 'collections/transaction_item.dart';
 
 // Add future collections here:
 // import 'collections/customer.dart';
@@ -54,7 +60,13 @@ class IsarService {
         IsarCategorySchema,
         IsarPaymentMethodSchema,
         IsarSettingsSchema,
-        // IsarCustomerSchema,
+        IsarProductSchema,
+        IsarTransactionSchema,
+        IsarTransactionItemSchema,
+        CustomerSchema,
+        IsarInventoryEventSchema,
+        IsarPaymentEventSchema
+
       ],
       directory: dir.path,
       name: 'omnistore_db',
@@ -69,5 +81,11 @@ class IsarService {
   static Future<void> close() async {
     await _isar?.close();
     _isar = null;
+  }
+
+  static Future<bool> setupCompleted() async {
+    final settings =
+    await instance.isarSettings.where().findFirst();
+    return settings != null;
   }
 }

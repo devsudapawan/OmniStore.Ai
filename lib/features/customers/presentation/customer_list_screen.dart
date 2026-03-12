@@ -6,9 +6,13 @@ import '../../../data/local/isar/collections/customer.dart';
 import 'add_customer_screen.dart';
 
 final customersStreamProvider =
-StreamProvider<List<Customer>>((ref) {
+StreamProvider<List<Customer>>((ref) async* {
   final repo = ref.read(customerRepositoryProvider);
-  return repo.watchCustomers();
+
+  // TODO: later get this from BusinessRepository
+  const businessId = "local_business";
+
+  yield* repo.watchCustomers(businessId);
 });
 
 class CustomerListScreen extends ConsumerWidget {

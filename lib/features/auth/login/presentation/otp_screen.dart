@@ -169,45 +169,47 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: SlideTransition(
-              position: _slideAnim,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
+          child: SingleChildScrollView(
+            child: FadeTransition(
+              opacity: _fadeAnim,
+              child: SlideTransition(
+                position: _slideAnim,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
 
-                    // ── Back button ──
-                    _buildBackButton(context),
+                      // ── Back button ──
+                      _buildBackButton(context),
 
-                    const SizedBox(height: 40),
+                      const SizedBox(height: 40),
 
-                    // ── Header ──
-                    _buildHeader(),
+                      // ── Header ──
+                      _buildHeader(),
 
-                    const SizedBox(height: 44),
+                      const SizedBox(height: 44),
 
-                    // ── OTP fields ──
-                    _buildOtpFields(),
+                      // ── OTP fields ──
+                      _buildOtpFields(),
 
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                    // ── Error message ──
-                    if (_hasError) _buildErrorMessage(),
+                      // ── Error message ──
+                      if (_hasError) _buildErrorMessage(),
 
-                    const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-                    // ── Verify button ──
-                    _buildVerifyButton(),
+                      // ── Verify button ──
+                      _buildVerifyButton(),
 
-                    const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-                    // ── Resend row ──
-                    _buildResendRow(),
-                  ],
+                      // ── Resend row ──
+                      _buildResendRow(),
+                    ],
+                  ),
                 ),
               ),
             ),

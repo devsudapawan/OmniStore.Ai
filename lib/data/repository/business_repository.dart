@@ -1,13 +1,16 @@
 import 'package:isar_community/isar.dart';
+import 'package:omni_store_ai/data/repository/store_template_repository.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/constants/enums.dart';
+import '../../core/device/device_service.dart';
 import '../../features/business_setup/providers/business_setup_provider.dart';
 import '../local/isar/collections/business.dart';
 import '../local/isar/collections/category.dart';
 import '../local/isar/collections/payment_method.dart';
 import '../local/isar/collections/settings.dart';
 import '../local/isar/isar_services.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// -------------------------------------------------------
 ///  BusinessRepository
@@ -33,7 +36,11 @@ class BusinessRepository {
   // ─────────────────────────────────────────
   Future<String> createBusiness(BusinessSetupState state) async {
     // Never create twice
+    final userId = Supabase.instance.client.auth.currentUser?.id;
     final exists = await IsarService.businessExists();
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
     if (exists) {
       final existing =
       await IsarService.instance.isarBusiness.where().findFirst();
@@ -55,7 +62,9 @@ class BusinessRepository {
       ..defaultUnit = state.defaultUnit.label
       ..createdAt = now
       ..updatedAt = now
-      ..syncStatus = 'pending';
+      ..syncStatus = SyncStatus.pending
+      ..deviceId = DeviceService.deviceId //
+      ..ownerId = userId;
 
     await IsarService.instance.writeTxn(() async {
       await IsarService.instance.isarBusiness.put(business);
@@ -89,23 +98,35 @@ class BusinessRepository {
   // ─────────────────────────────────────────
   //  STEP 3 — Create Default Categories
   // ─────────────────────────────────────────
+  // Future<void> createCategories(BusinessSetupState state) async {
+  //   final businessId = await _resolveBusinessId();
+  //   final now = DateTime.now();
+  //   final storeType = state.selectedStoreType ?? StoreType.grocery;
+  //
+  //   final categories = storeType.defaultCategories.map((name) {
+  //     return IsarCategory()
+  //       ..categoryId = _uuid.v4()
+  //       ..businessId = businessId
+  //       ..name = name
+  //       ..createdAt = now
+  //       ..syncStatus = 'pending';
+  //   }).toList();
+  //
+  //   await IsarService.instance.writeTxn(() async {
+  //     await IsarService.instance.isarCategorys.putAll(categories);
+  //   });
+  // }
+
   Future<void> createCategories(BusinessSetupState state) async {
     final businessId = await _resolveBusinessId();
     final now = DateTime.now();
-    final storeType = state.selectedStoreType ?? StoreType.grocery;
 
-    final categories = storeType.defaultCategories.map((name) {
-      return IsarCategory()
-        ..categoryId = _uuid.v4()
-        ..businessId = businessId
-        ..name = name
-        ..createdAt = now
-        ..syncStatus = 'pending';
-    }).toList();
+    final templateRepo = StoreTemplateRepository();
 
-    await IsarService.instance.writeTxn(() async {
-      await IsarService.instance.isarCategorys.putAll(categories);
-    });
+    await templateRepo.generateStoreData(
+      businessId: businessId,
+      storeType: state.selectedStoreType?.label ?? 'Grocery',
+    );
   }
 
   // ─────────────────────────────────────────
@@ -124,7 +145,7 @@ class BusinessRepository {
       ..syncStatus = 'pending';
 
     await IsarService.instance.writeTxn(() async {
-      await IsarService.instance.isarBusiness.put(settings as IsarBusiness);
+      await IsarService.instance.isarSettings.put(settings);
     });
   }
 
