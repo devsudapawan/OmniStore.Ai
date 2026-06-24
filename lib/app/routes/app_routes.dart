@@ -11,7 +11,8 @@ import '../../features/auth/onboarding/view/onboarding.dart';
 import '../../features/auth/splesh/splesh.dart';
 import '../../features/business_setup/presentation/screens/select_store_type_screen.dart';
 import '../../features/dashboard/presentation/bottom_nav_bar.dart';
-import '../../features/pos/presentation/add_transaction_screen.dart';
+import '../../features/pos/presentation/screens/pos_screen.dart';
+import '../../features/customers/presentation/customer_detail_screen.dart';
 import 'go_router_refresh_stream.dart';
 //
 // // ── Async provider: checks Isar once on startup ──
@@ -119,7 +120,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.addSale,
-        builder: (context, state) => const AddTransactionScreen(),
+        builder: (context, state) => const PosScreen(),
+      ),
+      GoRoute(
+        name: 'customer_detail',
+        path: Routes.customerDetail,
+        builder: (context, state) => CustomerDetailScreen(
+          customerId: state.extra as String,
+        ),
       ),
     ],
   );
@@ -139,5 +147,6 @@ class Routes {
   static const RECORDS       = '/records';
   static const SETTINGS      = '/settings';
   static const addSale       = '/add-sale';
+  static const customerDetail= '/customer-detail';
   static const ASSISTANT     = '/assistant';
 }

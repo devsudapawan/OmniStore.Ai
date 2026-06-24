@@ -292,8 +292,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../model/cart_item.dart';
+
 import '../../providers/pos_session_provider.dart';
+import 'product_quick_edit_sheet.dart';
 
 class ProductGrid extends ConsumerWidget {
   const ProductGrid({super.key});
@@ -306,61 +307,59 @@ class ProductGrid extends ConsumerWidget {
 
     if (products.isEmpty) {
       return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inventory_2_outlined,
-                size: 48, color: Color(0xFFD1D5DB)),
-            SizedBox(height: 12),
-            Text(
-              'No products in this category',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF9CA3AF),
-                fontWeight: FontWeight.w500,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.inventory_2_outlined, size: 48, color: Color(0xFFD1D5DB)),
+              SizedBox(height: 12),
+              Text(
+                'No products in this category',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF9CA3AF),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
 
     return GridView.builder(
-      // Extra bottom padding so FAB doesn't cover last row
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        // Taller ratio — gives room for stepper without overflow
         childAspectRatio: 0.72,
       ),
       itemCount: products.length,
       itemBuilder: (_, i) {
         final p = products[i];
-        final cartItem = session.cart
-            .where((c) => c.productId == p['id'])
-            .firstOrNull;
+        final cartItem = session.cart.where((c) => c.productId == p['id']).firstOrNull;
         final inCart = cartItem != null;
         final qty = cartItem?.quantity ?? 0;
 
         return _ProductCard(
           id: p['id'] as String,
           name: p['name'] as String,
-          price: p['price'] as double,
+          price: (p['price'] as num).toDouble(),
           unit: p['unit'] as String,
           inCart: inCart,
           qty: qty,
           onTap: () {
             HapticFeedback.lightImpact();
-            notifier.addProduct(CartItem(
-              productId: p['id'] as String,
-              name: p['name'] as String,
-              price: p['price'] as double,
-              unit: p['unit'] as String,
-              quantity: 1,
-            ));
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => ProductQuickEditSheet(product: p),
+            );
           },
           onIncrement: () {
             HapticFeedback.selectionClick();
@@ -368,7 +367,6 @@ class ProductGrid extends ConsumerWidget {
           },
           onDecrement: () {
             HapticFeedback.selectionClick();
-            // decrement to 0 removes from cart — FAB disappears automatically
             notifier.decrement(p['id'] as String);
           },
         );
